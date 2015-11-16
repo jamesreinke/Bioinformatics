@@ -12,6 +12,7 @@ object ChOne {
 			def help(g: String, sequences: Set[String] = Set(), prev: Map[String, Int] = Map(), old: String): Set[String] = {
 				g.length > window match {
 					case true => {
+						// shift the window over 1 nucleotide, generating new and old kmers
 						val oldKmer: String = old + g.substring(0, k - 1)
 						val newKmer: String = g.substring(0, k)
 						val newMap: Map[String, Int] = prev + 
@@ -25,9 +26,10 @@ object ChOne {
 			}
 			genome.length > window match {
 				case true => {
+				  // retrieve counts for the first sequence window
 				  val counts = frequency(genome, k)
 				  val sequences: Set[String] = counts.filter(x => x._2 > min).map(x => x._1).toSet
-				  help(genome.tail, sequences, counts, genome.head.toString)
+				  help(genome.tail, sequences, counts, genome.head.toString) // frame shift
 				}
 				case false => Set()
 			}
