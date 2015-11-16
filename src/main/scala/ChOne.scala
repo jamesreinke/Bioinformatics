@@ -1,52 +1,35 @@
 object ChOne {
 
-
-	object Clumps {
-
-
-		/* 
-			Given genome and kmer length, returns a set of all kmers that appear min times in a given window.
-		*/
-		def clumps(genome: String, k: Int, window: Int, min: Int): Set[String] = {
-			/* Recursively adds sequences to a set who fullfill the parameters */
-			def help(g: String, sequences: Set[String] = Set(), prev: Map[String, Int] = Map(), old: String): Set[String] = {
-				g.length > window match {
-					case true => {
-						// shift the window over 1 nucleotide, generating new and old kmers
-						val oldKmer: String = old + g.substring(0, k - 1)
-						val newKmer: String = g.substring(0, k)
-						val newMap: Map[String, Int] = prev + 
-						  (oldKmer -> (prev.getOrElse(oldKmer, 1) - 1)) + 
-						  (newKmer -> (prev.getOrElse(newKmer, 0) + 1))
-						  if(newMap.getOrElse(newKmer, 0) > min) help(g, sequences + newKmer, newMap, g.head.toString)
-						  else help(g, sequences, newMap, g.head.toString)
-					}
-					case false => sequences
-				}
-			}
-			genome.length > window match {
+	/* 
+		Given genome and kmer length, returns a set of all kmers that appear min times in a given window.
+	*/
+	def clumps(genome: String, k: Int, window: Int, min: Int): Set[String] = {
+		/* Recursively adds sequences to a set who fullfill the parameters */
+		def help(g: String, sequences: Set[String] = Set(), prev: Map[String, Int] = Map(), old: String): Set[String] = {
+			g.length > window match {
 				case true => {
-				  // retrieve counts for the first sequence window
-				  val counts = frequency(genome, k)
-				  val sequences: Set[String] = counts.filter(x => x._2 > min).map(x => x._1).toSet
-				  help(genome.tail, sequences, counts, genome.head.toString) // frame shift
+					// shift the window over 1 nucleotide, generating new and old kmers
+					val oldKmer: String = old + g.substring(0, k - 1)
+					val newKmer: String = g.substring(0, k)
+					val newMap: Map[String, Int] = prev + 
+					  (oldKmer -> (prev.getOrElse(oldKmer, 1) - 1)) + 
+					  (newKmer -> (prev.getOrElse(newKmer, 0) + 1))
+					  if(newMap.getOrElse(newKmer, 0) > min) help(g, sequences + newKmer, newMap, g.head.toString)
+					  else help(g, sequences, newMap, g.head.toString)
 				}
-				case false => Set()
-			}
-			Set()
-		}
-
-		/* Takes the frequency counts for all kmers in a given genome. */
-		def frequency(genome: String, k: Int, counts: Map[String, Int] = Map()): Map[String, Int] = {
-			genome.length > k match {
-				case true => {
-					val kmer = genome.substring(0, k)
-					frequency(genome.tail, k, counts + (kmer -> (counts.getOrElse(kmer, 0) + 1)))
-				}
-				case false => counts
+				case false => sequences
 			}
 		}
-
+		genome.length > window match {
+			case true => {
+			  // retrieve counts for the first sequence window
+			  val counts = frequency(genome, k)
+			  val sequences: Set[String] = counts.filter(x => x._2 > min).map(x => x._1).toSet
+			  help(genome.tail, sequences, counts, genome.head.toString) // frame shift
+			}
+			case false => Set()
+		}
+		Set()
 	}
 
 
@@ -81,21 +64,15 @@ object ChOne {
 	}
 
 
-	/* Returns a set of the most frequent kmers and their frequency */
-	def frequentKmers(text: String, k: Int): Map[String, Int] = {
-		val kmers = kmer(text, k)
-		var max = 0
-		var mostFrequent = Map[String, Int]()
-		var counts = Map[String, Int]()
-		for(word <- kmers) {
-			val count = counts.getOrElse(word, 0) + 1
-			counts += (word -> count)
-			if(count > max) max = count
+	/* Takes the frequency counts for all kmers in a given genome. */
+	def frequency(genome: String, k: Int, counts: Map[String, Int] = Map()): Map[String, Int] = {
+		genome.length > k match {
+			case true => {
+				val kmer = genome.substring(0, k)
+				frequency(genome.tail, k, counts + (kmer -> (counts.getOrElse(kmer, 0) + 1)))
+			}
+			case false => counts
 		}
-		for((word, count) <- counts) {
-			if(count == max) mostFrequent += (word -> max)
-		}
-		mostFrequent
 	}
 
 
