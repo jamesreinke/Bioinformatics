@@ -14,8 +14,8 @@ object ChOne {
 					val newMap: Map[String, Int] = prev + 
 					  (oldKmer -> (prev.getOrElse(oldKmer, 1) - 1)) + 
 					  (newKmer -> (prev.getOrElse(newKmer, 0) + 1))
-					  if(newMap.getOrElse(newKmer, 0) > min) help(g, sequences + newKmer, newMap, g.head.toString)
-					  else help(g, sequences, newMap, g.head.toString)
+					  if(newMap.getOrElse(newKmer, 0) > min) help(g.tail, sequences + newKmer, newMap, g.head.toString)
+					  else help(g.tail, sequences, newMap, g.head.toString)
 				}
 				case false => sequences
 			}
@@ -25,9 +25,9 @@ object ChOne {
 			  // retrieve counts for the first sequence window
 			  val counts = frequency(genome, k)
 			  val sequences: Set[String] = counts.filter(x => x._2 > min).map(x => x._1).toSet
-			  help(genome.tail, sequences, counts, genome.head.toString) // frame shift
+			  return help(genome.tail, sequences, counts, genome.head.toString) // frame shift
 			}
-			case false => Set()
+			case false => return Set()
 		}
 		Set()
 	}
@@ -47,7 +47,10 @@ object ChOne {
 	}
 
 
-	/* Finds all indices where the given pattern exist in a sequence */
+	/* 
+		Finds all indices where the given pattern exist in a sequence 
+			Inefficient in that it will find the same indicies over and over again.
+	*/
 	def indicies(pattern: String, genome: String): Set[Int] = {
 		var indicies = Set[Int]()
 		val length = genome.length - pattern.length
@@ -64,7 +67,9 @@ object ChOne {
 	}
 
 
-	/* Takes the frequency counts for all kmers in a given genome. */
+	/* 
+		Takes the frequency counts for all kmers in a given genome. 
+	*/
 	def frequency(genome: String, k: Int, counts: Map[String, Int] = Map()): Map[String, Int] = {
 		genome.length > k match {
 			case true => {
@@ -76,7 +81,9 @@ object ChOne {
 	}
 
 
-	/* Generates a list of all sequences of length k */
+	/* 
+		Generates a list of all sequences of length k 
+	*/
 	def kmer(text: String, k: Int): List[String] = {
 		val total = text.length - k
 		val ret = for(i <- 0 to total) yield {
